@@ -32,11 +32,13 @@ def get_ip():
     except socket.error as err:
         print(f"Unable to get IP Address: {err}")
 
-def write_to_file(filename, files, wordcount, top3, ip):
+def write_to_file(filename, files, wcinfo, wordcount, top3, ip):
     try:
         with open(filename, 'w') as file:
             file.write(f"The files in /home/data are {files}\n")
-            file.write(f"There are {wordcount} total words in the two files\n")
+            for line in wcinfo:
+                file.write(f"{line}\n")
+            file.write(f"There are {wordcount} total words in the files\n")
             file.write(f"The top three words in IF.txt were {top3}\n")
             file.write(f"The IP of this machine is {ip}\n")
     except FileNotFoundError:
@@ -55,10 +57,14 @@ if __name__ == "__main__":
     pwd = os.getcwd()
     datpath = pwd+"/data"
     files = os.listdir(datpath)
-    wc1 = count_words("/home/data/IF.txt")
-    wc2 = count_words("/home/data/Limerick-1.txt")
+    wcinfo = []
+    totalwc = 0
+    for filename in files:
+        wc = count_words(datpath+"/"+filename)
+        totalwc += wc
+        wcinfo.append(datpath + "/" + filename + " has " + str(wc) + " words")
     top3 = get_top_3("/home/data/Limerick-1.txt")
     ip = get_ip()
     os.makedirs("/home/output")
-    write_to_file("/home/output/result.txt", files, wc1+wc2, top3, ip)
+    write_to_file("/home/output/result.txt", files, wcinfo, totalwc, top3, ip)
     print_file("/home/output/result.txt")
